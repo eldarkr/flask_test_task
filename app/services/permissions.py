@@ -14,4 +14,4 @@ class Permissions:
 
     @staticmethod
     def can_manage_own_articles(current_user: UserGet, article: ArticleGet) -> bool:
-        return current_user.role == UserRole.ADMIN and current_user.id == article.owner_id
+        return current_user.role == UserRole.ADMIN or current_user.id == article.owner_id

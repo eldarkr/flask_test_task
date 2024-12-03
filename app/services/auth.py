@@ -1,19 +1,20 @@
-from pydantic import UUID4
+from pydantic import EmailStr
 
 from services.user import UserService
 from schemas.user import UserGet
-from core.security import SecurityJWT
+from core.security import SecurityJWT, SecurityService
 
 
 class AuthService:
     def __init__(self, service: UserService):
         self.service = service
 
-    def login(self, user_id: UUID4, password: str) -> UserGet:
-        user = self.service.get_user(user_id)
-        if user and user.password == password:
-            return user
-        return None
+    def login(self, password: str, email: EmailStr) -> UserGet:
+        user_credentials = self.service.get_user_credentials(email)
+        if not user_credentials \
+                or not SecurityService.verify_password(password, user_credentials.password):
+            return None
+        return SecurityService.create_access_token(email)
 
     def get_current_user_by_token(self, token):
         payload = SecurityJWT().verify(token)

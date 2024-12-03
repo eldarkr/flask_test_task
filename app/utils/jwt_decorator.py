@@ -1,5 +1,4 @@
 from flask import request, jsonify
-from flask_bcrypt import Bcrypt
 from functools import wraps
 
 from services.user import UserService
@@ -7,7 +6,6 @@ from services.auth import AuthService
 from db.db_session import get_db
 
 session = next(get_db())
-bcrypt = Bcrypt()
 
 
 def jwt_required(func):

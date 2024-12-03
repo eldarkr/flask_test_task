@@ -1,10 +1,16 @@
 import uuid
+from enum import Enum
 from pydantic import UUID4
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Enum, String, ForeignKey
+from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import Enum as SQLAlchemyEnum
 
-from schemas.enums import UserRole
+
+class UserRole(Enum):
+    ADMIN = "admin"
+    EDITOR = "editor"
+    VIEWER = "viewer"
 
 
 class Base(DeclarativeBase):
@@ -25,7 +31,7 @@ class User(BaseId):
     email: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(200), nullable=False)
     role: Mapped[UserRole] = mapped_column(
-        Enum(UserRole, name="user_roles"), nullable=False, default=UserRole.VIEWER
+        SQLAlchemyEnum(UserRole, name="user_roles"), nullable=False, default=UserRole.VIEWER
     )
     
     articles: Mapped[list["Article"]] = relationship("Article", back_populates="owner")

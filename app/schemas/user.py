@@ -13,6 +13,7 @@ class UserCreate(UserBase):
     password: str
     role: Optional[UserRole] = UserRole.VIEWER
 
+
 class UserGet(UserBase):
     id: UUID4
     role: UserRole
@@ -21,3 +22,7 @@ class UserGet(UserBase):
 class UserLogin(UserBase):
     password: str
 
+
+class UserUpdate(UserBase):
+    email: EmailStr = None
+    password: str = None

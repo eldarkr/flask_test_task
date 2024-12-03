@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from schemas.user import UserCreate
-from services.user import UserService
+from services.user import UserService, UserUpdate
 from db.db_session import get_db
 from utils.jwt_decorator import jwt_required
 
@@ -20,15 +20,18 @@ def get_user(user_id):
     })
     
     
-@user_bp.route("/me")
-@jwt_required
-def me():
-    user = request.current_user
-    return jsonify({
-        "id": user.id,
-        "email": user.email, 
-        "role": user.role.value
-    })
+@user_bp.route('/all')
+def get_all_users():
+    users = UserService(session).get_all_users()
+    users = [
+        {
+            "id": user.id,
+            "email": user.email,
+            "role": user.role.value
+        } for user in users
+    ]
+    
+    return jsonify(users)
 
 
 @user_bp.route('/', methods=['POST'])
@@ -75,3 +78,31 @@ def delete_user(user_id):
         "email": user.email,
         "role": user.role.value
     })
+
+
+@user_bp.route('/<uuid:user_id>', methods=['PUT'])
+@jwt_required
+def update_user(user_id):
+    user_service = UserService(session)
+    current_user = request.current_user
+    user = user_service.update_user(user_id, UserUpdate(**request.json), current_user)
+    
+    return jsonify({
+        "id": user.id,
+        "email": user.email,
+        "role": user.role.value
+    })
+
+
+@user_bp.route('/search')
+def search_user():
+    text = request.json.get('text')
+    users = UserService(session).find_user_by_text(text)
+    
+    return jsonify([
+        {
+            "id": user.id,
+            "email": user.email,
+            "role": user.role.value
+        } for user in users
+    ])
